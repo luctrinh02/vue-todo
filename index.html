@@ -1,53 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic-Tac-Toe</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+        integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"
+        integrity="sha512-LUKzDoJKOLqnxGWWIBM4lzRBlxcva2ZTztO8bTcWPmDSpkErWx0bSP4pdsjNH8kiHAUPaT06UXcb+vOEZH+HpQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="icon" href="1021366.png" type="image/gif" sizes="16x16">
 </head>
+
 <body>
     <div id="app">
         <div class="container">
-            <div class="row d-flex justify-content-center mt-3">
+            <div class="row d-flex justify-content-center mt-5">
                 <div class="col-3"></div>
                 <div class="col-6">
                     <div class="card">
-                        <div class="card-header">
-                            <div class="row justify-content-between">
-                                <div class="col-4 text-center" :class="{'text-primary':nowTurn}">X - {{AName}}</div>
-                                <div class="col-4 text-center">{{getScore}}</div>
-                                <div class="col-4 text-center" :class="{'text-danger':!nowTurn}">{{BName}} - O</div>
-                            </div>
-                        </div>
-                        <div class="card-body bg-info">
+                        <h5 class="card-header">
+                            Danh sách công việc của {{user}} <button class="btn" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal"><i class="fa-solid fa-circle-info"></i></button>
+                        </h5>
+                        <div class="card-body">
                             <div class="row">
-                                <div v-for="(button,index) in arrayButton" class="col-4">
-                                    <div class="row">
-                                        <button @click="clickHandler(index)" class="btn btn-outline-dark" style="height: 150px;" :disabled="button.isDisable">
-                                            <span v-if="button.value=='X'" class="text-primary fs-1">{{button.value}}</span>
-                                            <span v-if="button.value=='O'" class="text-danger fs-1">{{button.value}}</span>
-                                        </button>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" :placeholder="[[placeholderCreate]]"
+                                        v-model="todoInput" @keyup.enter="addNewTodo()" @keyup.esc="cancelUpdate()">
+                                    <span v-if="updateFlag==null" class="input-group-text" id="basic-addon1"><i
+                                            class="fa-solid fa-plus"></i></span>
+                                    <span v-else class="input-group-text" id="basic-addon1"><i
+                                            class="fa-solid fa-pen"></i></span>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="mt-1">
+                                <div class="row mt-1" v-for="(todo,index) in todoShow">
+                                    <div class="col-1">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault"
+                                                :value="todo.id" :checked="todo.isNotDone"
+                                                @change="complateTodo(index)">
+                                        </div>
                                     </div>
+                                    <div class="col-9"
+                                        :class="{'text-decoration-line-through text-muted':!todo.isNotDone}">
+                                        {{todo.id}}. {{todo.value}}
+                                    </div>
+                                    <div class="col-2">
+                                        <span class="me-3" @click="update(index)"><i class="fa-solid fa-pen"></i></span>
+                                        <span><i class="fa-solid fa-x" @click="deleteTodo(todo.id)"></i></span>
+                                    </div>
+                                </div>
+                                <div class="row" v-if="todoShow.length==0">
+                                    <h3 class="alert alert-warning">
+                                        Không có công việc nào
+                                    </h3>
                                 </div>
                             </div>
                         </div>
                         <div class="card-footer">
                             <div class="row d-flex justify-content-center">
-                                <div class="col-4"></div>
-                                <div class="col-4 text-center">
-                                    <button @click="defaultGame()" class="btn btn-secondary">
-                                        Khởi động lại
-                                    </button>
+                                <div class="col-9">
+                                    <select name="" id="" class="form-control" v-model="filterValue"
+                                        @change="changeFilter()">
+                                        <option value="">Tất cả</option>
+                                        <option value="false">Đã hoàn thành</option>
+                                        <option value="true">Chưa hoàn thành</option>
+                                    </select>
                                 </div>
-                                <div class="col-4"></div>
+                                <div class="col-3">
+                                    <p class="mt-2"> Số lượng: {{getTodoCount}}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -56,6 +90,24 @@
             </div>
         </div>
     </div>
-    <script src="game.js"></script>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Hướng dẫn sử dụng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Ấn enter để lưu giá trị <br>
+                    Ấn esc để thoát chế độ sửa
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
+
 </html>
